@@ -204,9 +204,333 @@ def upload_file():
         flash(f'Upload failed: {str(e)}')
         return redirect(url_for('index'))
 
-# [Your existing TEMPLATE variable remains the same]
+# HTML Template
 TEMPLATE = '''
-[... your existing HTML template ...]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG to STL Tool by 3DTV</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(-45deg, #1e3c72, #2a5298, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            25% { background-position: 100% 50%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #fff, #f0f9ff, #dbeafe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .description {
+            font-size: 1rem;
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(30, 60, 114, 0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .upload-area:hover::before {
+            left: 100%;
+        }
+        
+        .upload-area:hover {
+            border-color: #1e3c72;
+            background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(30, 60, 114, 0.15);
+        }
+        
+        .upload-area.dragover {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            transform: scale(1.02);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .upload-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .upload-subtext {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-preview {
+            display: none;
+            background: #1e3c72;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-weight: 600;
+            margin-top: 15px;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .convert-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .convert-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .convert-btn:hover::before {
+            left: 100%;
+        }
+        
+        .convert-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(30, 60, 114, 0.4);
+        }
+        
+        .convert-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .alert {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #dc2626;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 640px) {
+            .title { font-size: 2.5rem; }
+            .card { padding: 30px 20px; }
+            .upload-area { padding: 40px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">SVG to STL Tool by 3DTV</h1>
+            <p class="description">Upload an SVG file and convert it to a 3D printable STL file using linear extrusion</p>
+        </div>
+        
+        <div class="card">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert">⚠️ {{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">🎨</div>
+                    <div class="upload-text">Drop your SVG file here</div>
+                    <div class="upload-subtext">or click to browse • SVG files only, up to 16MB</div>
+                    <input type="file" name="file" id="fileInput" accept=".svg" required>
+                    <div class="file-preview" id="filePreview"></div>
+                </div>
+                
+                <button type="submit" class="convert-btn" id="convertBtn">
+                    🚀 Generate STL File
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const convertBtn = document.getElementById('convertBtn');
+        const form = document.getElementById('uploadForm');
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                const file = e.target.files[0];
+                if (file.name.toLowerCase().endsWith('.svg')) {
+                    filePreview.innerHTML = `🎨 ${file.name} (${(file.size/1024).toFixed(1)}KB)`;
+                    filePreview.style.display = 'block';
+                } else {
+                    alert('Please select an SVG file');
+                    fileInput.value = '';
+                }
+            }
+        });
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files[0]) {
+                const file = files[0];
+                if (file.name.toLowerCase().endsWith('.svg')) {
+                    fileInput.files = files;
+                    filePreview.innerHTML = `🎨 ${file.name} (${(file.size/1024).toFixed(1)}KB)`;
+                    filePreview.style.display = 'block';
+                } else {
+                    alert('Please drop an SVG file');
+                }
+            }
+        });
+        
+        form.addEventListener('submit', () => {
+            convertBtn.innerHTML = '<div class="spinner"></div>Generating STL...';
+            convertBtn.disabled = true;
+            
+            // Simple reset after 2 seconds - works reliably
+            setTimeout(() => {
+                convertBtn.innerHTML = '🚀 Generate STL File';
+                convertBtn.disabled = false;
+                fileInput.value = '';
+                filePreview.style.display = 'none';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
 '''
 
 if __name__ == '__main__':
