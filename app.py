@@ -95,7 +95,7 @@ def convert_svg_to_stl(svg_path, output_path, extrude_height=5):
             cmd, 
             capture_output=True, 
             text=True, 
-            timeout=60,
+            timeout=120,  # Increased timeout for cloud deployment
             cwd=temp_dir
         )
         
@@ -164,7 +164,7 @@ def upload_file():
         
         if success and os.path.exists(stl_path):
             import threading
-            threading.Timer(5.0, lambda: os.remove(stl_path) if os.path.exists(stl_path) else None).start()
+            threading.Timer(10.0, lambda: os.remove(stl_path) if os.path.exists(stl_path) else None).start()
             
             return send_file(
                 stl_path, 
