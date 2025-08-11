@@ -30,12 +30,12 @@ COPY . .
 # Create uploads directory
 RUN mkdir -p /tmp/uploads && chmod 755 /tmp/uploads
 
-# Expose port (Railway will set PORT environment variable)
-EXPOSE $PORT
+# Expose default port (Railway will override with PORT env var)
+EXPOSE 5002
 
-# Health check
+# Health check - use wget since it's more reliable in containers
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-5002}/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5002/health || exit 1
 
 # Run the application
 CMD ["python", "app.py"]
