@@ -92,18 +92,17 @@ def convert_svg_to_stl(svg_path, output_path, extrude_height=5):
         with open(scad_path, 'w', encoding='utf-8') as f:
             f.write(scad_content)
         
-        # Run OpenSCAD to generate STL with memory limits
+        # Run OpenSCAD to generate STL - FIXED COMMAND FORMAT
         cmd = [
             openscad_path,
-            '-o', output_path,
-            '--render',  # Force render for better compatibility
-            scad_path
+            '--export-format', 'binstl',  # Specify binary STL format
+            '-o', output_path,            # Output file
+            scad_path                     # Input SCAD file
         ]
         
         logger.info(f"Running OpenSCAD command: {' '.join(cmd)}")
         
         # Change to the directory containing the SVG file so OpenSCAD can find it
-        # Reduced timeout for Railway's constraints
         result = subprocess.run(
             cmd, 
             capture_output=True, 
